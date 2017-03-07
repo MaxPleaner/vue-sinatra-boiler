@@ -1,0 +1,21 @@
+{
+  "name": "vue-webpack-coffee-slim-boiler",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "./node_modules/.bin/webpack-dev-server --content-base . --inline --hot",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "coffee-loader": "^0.7.3",
+    "coffee-script": "^1.12.4",
+    "coffeescript": "^2.0.0-alpha1",
+    "express": "^4.15.2",
+    "slim-lang-loader": "0.0.3",
+    "webpack": "^2.2.1",
+    "webpack-dev-server": "^2.4.1"
+  }
+}
