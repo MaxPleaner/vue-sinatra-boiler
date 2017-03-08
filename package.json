@@ -15,7 +15,7 @@
     "coffee-script": "^1.12.4",
     "express": "^4.15.2",
     "jquery": "^3.1.1",
-    "slim-lang-loader": "0.0.4",
+    "slim-lang-loader": "0.0.7",
     "vue": "^2.2.1",
     "webpack": "^2.2.1",
     "webpack-dev-server": "^2.4.1"
