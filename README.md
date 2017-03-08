@@ -27,34 +27,34 @@ For reference, here's a tree of this repo:
 
 ```txt
 .
-├── client.coffee
-├── components
-│   ├── about
-│   │   ├── about.coffee
-│   │   └── about.slim
-│   ├── components.coffee
+├── client.coffee-------------Entrace to client-side code
+├── components                
+│   ├── components.coffee-----Manifest of Vue components
+│   ├── about-----------------Each Vue component has its own folder with:
+│   │   ├── about.coffee--------a coffee file (for scripting)
+│   │   └── about.slim----------a slim file (for templating)
 │   ├── contact
 │   │   ├── contact.coffee
 │   │   └── contact.slim
 │   ├── navbar
 │   │   ├── navbar.coffee
 │   │   └── navbar.slim
-│   ├── root
+│   ├── root------------------The layout component (always shown)
 │   │   ├── root.coffee
 │   │   └── root.slim
 │   └── welcome
 │       ├── welcome.coffee
 │       └── welcome.slim
-├── Gemfile
-├── index.html
+├── Gemfile-------------------Lists Ruby dependencies such as the slim compiler
+├── index.html----------------HTML page which loads our app via JS
 ├── lib
-│   ├── router.coffee
-│   └── store.coffee
-├── package.json
+│   ├── router.coffee---------Client-side routing of path to component
+│   └── store.coffee----------Vuex storage system (some similarity to redux)
+├── package.json--------------NPM dependencies
 ├── README.md
 ├── style
-│   └── app.sass
-└── webpack.config.js
+│   └── app.sass--------------CSS written in Sass
+└── webpack.config.js---------Webpack compiles & serves the app
 
 ```
 
