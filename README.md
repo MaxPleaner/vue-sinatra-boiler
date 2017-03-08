@@ -4,7 +4,9 @@ This is a boilerplate using:
 
 - webpack: server which automatically compiles and hot-pushes changes to browser.
 - Vue: a client-side framework for data binding.
-- coffeescript: a nicer syntax for javascript
+- coffeescript (2): a nicer syntax for javascript
+  - a big benefit of this is ES6 arrow functions (`=>`), which differ from the standard
+    coffeescript `->` since they bind the value of `this` to their lexical context.
 - slim: a ruby html templating library (used to build Vue components' HTML)
 
 
@@ -26,7 +28,7 @@ What good is a boiler if the more nuanced details aren't covered in the README?
 For reference, here's a tree of this repo:
 
 ```txt
-├── boiler_app.coffee
+├── client.coffee
 ├── components
 │   ├── components.coffee
 │   ├── navbar
@@ -44,9 +46,9 @@ For reference, here's a tree of this repo:
 
 First of all, webpack does a lot of the magic here (in `webpack.config.js`). The `context: __dirname` line starts a static HTTP server on port 8080 which sends the `index.html` file at the root of this repo. That file loads the script `bundle.js`, which Webpack maintains as an _in-memory_ concatenation of all our compiled coffeescripts.
 
-To reiterate, every .coffee file is combined into `bundle.js` which is loaded by `index.html`. The webpack config specifies `entry: "./boiler_app.coffee"`, and that file becomes the launching point of the client side code.
+To reiterate, every .coffee file is combined into `bundle.js` which is loaded by `index.html`. The webpack config specifies `entry: "./client.coffee"`, and that file becomes the launching point of the client side code.
 
-`boiler_app.coffee` loads Vue components from `components/components.coffee`, This components file individually requires each of the components in the `components/` folder (such as navbar and root). Specifically, it requires the `.coffee` file of the component such as `components/navbar/navbar.coffee`. That coffee file then requires the .slim template (`components/navbar/navbar.slim`) which contains the Vue-style HTML markup. The slim templates are loaded using the [slim-lang-loader](http://github.com/maxpleaner/slim-lang-loader), which I authored. For example `require('html-loader!./navbar.slim')` is in the `navbar.coffee` file; this returns a HTML string that is automatically updated whenever the .slim file changes.
+`client.coffee` loads Vue components from `components/components.coffee`, This components file individually requires each of the components in the `components/` folder (such as navbar and root). Specifically, it requires the `.coffee` file of the component such as `components/navbar/navbar.coffee`. That coffee file then requires the .slim template (`components/navbar/navbar.slim`) which contains the Vue-style HTML markup. The slim templates are loaded using the [slim-lang-loader](http://github.com/maxpleaner/slim-lang-loader), which I authored. For example `require('html-loader!./navbar.slim')` is in the `navbar.coffee` file; this returns a HTML string that is automatically updated whenever the .slim file changes.
 
 Every component must be listed in `components.coffee`, and there can't be anything dynamic passed to `require` or webpack won't be able to track the dependencies. In other words, _all requires in the app must be static_. 
 

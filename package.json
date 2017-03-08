@@ -13,10 +13,18 @@
     "blackcoffee": "^0.1.5",
     "coffee-loader": "^0.7.3",
     "coffee-script": "^1.12.4",
+    "coffeescript": "^2.0.0-alpha1",
+    "css-loader": "^0.26.4",
     "express": "^4.15.2",
+    "extract-text-webpack-plugin": "^2.1.0",
     "jquery": "^3.1.1",
+    "node-sass": "^4.5.0",
+    "sass-loader": "^6.0.3",
     "slim-lang-loader": "0.0.7",
+    "style-loader": "^0.13.2",
     "vue": "^2.2.1",
+    "vue-router": "^2.3.0",
+    "vuex": "^2.2.1",
     "webpack": "^2.2.1",
     "webpack-dev-server": "^2.4.1"
   }
