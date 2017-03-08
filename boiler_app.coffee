@@ -12,6 +12,7 @@ class BoilerApp
   components: require('./components/components').load {deps}   
 
   init: ->
+    window.root = @components.root
     @components.root.$mount @anchor
 
 # ------------------------------------------------
