@@ -4,9 +4,7 @@ This is a boilerplate using:
 
 - webpack: server which automatically compiles and hot-pushes changes to browser.
 - Vue: a client-side framework for data binding.
-- coffeescript (2): a nicer syntax for javascript
-  - a big benefit of this is ES6 arrow functions (`=>`), which differ from the standard
-    coffeescript `->` since they bind the value of `this` to their lexical context.
+- coffeescript 2 (hot off the press): a nicer syntax for javascript
 - slim: a ruby html templating library (used to build Vue components' HTML)
 
 
@@ -79,4 +77,10 @@ Every component must be listed in `components.coffee`, and there can't be anythi
 One other detail about the components' coffee files:
 
 the `navbar.coffee` returns a `Vue.component` while `root.coffee` returns only a `new Vue`. Root isn't defined as a component because it's top level, but everything else can be one. When a component is defined, a HTML tag is generated. That's why `root.slim` renders `<navbar></navbar>` (which is a custom HTML tag).
+
+_routing_:
+
+`root.slim` acts as a layout file.
+It renders a `router-view` component which is akin to the `yield` in Rails.
+The routes are declared in `lib/router.coffee`.
 
