@@ -1,0 +1,17 @@
+{
+  "name": "mixer",
+  "version": "1.0.0",
+  "description": "A simple sinatra websocket server with faye/eventmaching",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bower": "^1.8.0",
+    "browserify": "^14.1.0",
+    "jquery": "^3.1.1",
+    "valid-url": "^1.0.9"
+  }
+}

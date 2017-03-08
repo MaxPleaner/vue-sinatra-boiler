@@ -24,11 +24,21 @@ module.exports = {
     filename: "bundle.js"
   },
 
-  // .slim requests are transformed to return html strings 
-  // this is done with require and html-loader
-  // see components/root/root.coffee for an example
-
-  // Furthermore, coffeescript files are compiled to js
+  // Outline of loaders:
+  //
+  //   slim => html => coffee
+  //     see components/root/root.coffee for an example of loading a slim
+  //     template into a coffee string as HTML
+  //
+  //   coffee => js
+  //      everything is concatenated into bundle.js
+  //
+  //   sass => css
+  //      What's not intuitive about this is that the sass file
+  //      actually has to be required from javascript.
+  //      This triggers it to be attached to the DOM automatically.
+  //      See client.coffee, which loads style/app.sass
+  //  
 
   module: {
     loaders: [

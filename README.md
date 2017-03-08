@@ -16,8 +16,12 @@ This is a boilerplate using:
 
 **running**:
 
-- To run the boilerplate example _as-is_, just to see if it works, enter `npm run dev`. The definition of this command is in `package.json`. It launches `webpack.config.js` using `webpack-dev-server`. 
-- visit http://localhost:8080
+There are two components, which should be run in separate tabs:
+
+  - server (runs config.ru): `cd server; thin start`
+  - client (runs webpack.config.js): `npm run dev`
+
+Then visit http://localhost:8080
 
 **understanding/extending**
 

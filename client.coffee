@@ -5,6 +5,8 @@
 # passed around as arguments to the other files.
 # ================================================
 
+# This is a bit unintuitive, but the following require automatically
+# attaches the CSS stylesheet to the DOM.
 require("./style/app.sass")
 
 # Deps from NPM
