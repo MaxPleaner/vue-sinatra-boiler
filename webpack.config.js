@@ -9,8 +9,6 @@
 // # ================================================
 
 // Little hack so that that coffee-loader uses coffee 2
-// coffee 2 can be replaced here with blackcoffee (another alternate interpreter)
-
 var coffeescript = require('coffee-script')
 require.cache[require.resolve('coffee-script')] = require.cache[require.resolve('coffeescript')]
 
