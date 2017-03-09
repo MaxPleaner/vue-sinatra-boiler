@@ -35,4 +35,19 @@ class Client
 
 # Start app
 $ ->
-  new Client().load()
+  $.get "http://localhost:3000/api", (response) ->
+    { token } = JSON.parse(response)
+
+    new Client().load()
+
+    ws = new WebSocket "ws://localhost:3000/api?token=token"
+
+    ws.onopen = ->
+      ws.send(JSON.stringify msg: "testing conn")
+
+    
+    ws.onmessage= (m) ->
+      console.log JSON.parse(m.data).msg
+    
+    ws.onclose = ->
+

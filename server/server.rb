@@ -21,6 +21,17 @@ require 'sass'
 # better than JS
 require 'coffee_script'
 
+# Super easy authentication with Github
+require 'sinatra_auth_github'
+
+# reads env vars from .env
+require 'dotenv'
+Dotenv.load
+
+# since the Front end is on another host
+require 'sinatra/cross_origin'
+
+
 # Requires all ruby files in this directory.
 # Orders them by the count of "/" in their filename.
 # Therefore, shallower files are loaded first.
@@ -32,14 +43,12 @@ Dir.glob("./**/*.rb").sort_by { |x| x.count("/") }.each do |path|
   require path
 end
 
-# A global array of sockets.
-# This can certainly be altered to a hash if faster lookups are desired.
-Sockets = []
+Sockets = {}
 
 # Our server, a Sinatra app
 class Server < Sinatra::Base
 
-  # Thin works well with Faye and Sinatra
+  # Thin works well with faye-websocket
   # However keep in mind that the server needs to be run with "thin start"
   # NOT ruby server.rb,
   #     rackup,
@@ -49,9 +58,31 @@ class Server < Sinatra::Base
   set :server, 'thin'
   Faye::WebSocket.load_adapter('thin')
 
+  register Sinatra::CrossOrigin
+
+  # Github oAuth stuff
+  enable :sessions
+  set :github_options, {
+    scopes: "user",
+    secret: ENV["GITHUB_CLIENT_SECRET"],
+    client_id: ENV["GITHUB_CLIENT_ID"]
+  }
+  register Sinatra::Auth::Github
+
+  get '/authenticate' do
+    authenticate!
+    username = github_user.login
+  end
+
+  get '/logout' do
+    logout!
+    "ok"
+  end
+
   # The root route, which handles both websocket and HTTP requests
   # See server_skeleton/lib/routes/index.rb
   get '/' do
+    cross_origin allow_origin: "http://localhost:8080"
     Routes::Index.run(request_obj)
   end
 
