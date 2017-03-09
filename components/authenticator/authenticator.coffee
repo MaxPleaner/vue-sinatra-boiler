@@ -1,0 +1,26 @@
+module.exports = load: ({deps: {Vue}}) ->
+
+  shared_data =
+    token: null
+    done: false
+    username: null
+
+  Vue.component "authenticator",
+    template: require('html-loader!./authenticator.slim')
+    data: -> shared_data
+    computed:
+      authenticate_url: ->
+        if !@token
+          "#"
+        else
+          "http://localhost:3000/authenticate?token=#{@token}"  
+      login_text: ->
+        if !@token
+          "1 sec"
+        else
+          "authenticate"
+    methods:
+      open_in_new_tab: (e) ->
+        e.preventDefault()
+        popup = window.open "about:blank", "_blank"
+        popup.location = e.currentTarget.href
