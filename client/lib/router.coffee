@@ -3,5 +3,5 @@ module.exports = load: ({ deps: { Vue, VueRouter, components } }) ->
   new VueRouter routes: [
     { path: '/about', component: components.about },
     { path: '/contact', component: components.contact }
-    { path: '/', component: components.welcome }
+    { path: '/', component: components.todos }
   ]
