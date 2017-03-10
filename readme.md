@@ -21,13 +21,14 @@ This is a boilerplate using:
 - First of all, clone this repo (or fork).
 - Client:
   - first `cd client`. 
-  - Ruby deps are listed in the `Gemfile`. Run `bundle install`.
-  - NPM deps are listed in `package.json`. Run `npm insall`.
+  - Ruby deps are listed in the [`Gemfile`](./client/Gemfile). Run `bundle install`.
+  - NPM deps are listed in [`package.json`](./client/package.json). Run `npm insall`.
 - Server:
   - the `server/` is a separate app and needs to have its dependencies installed
     too. `cd server` and `bundle install` there. - 
-  - Create an application on Github developers console. Copy `server/.env.example` to
-`   server/.env` and then customize it with your credentials.
+  - Create an application on Github developers console. Copy
+    [`server/.env.example`](./server/.env.example) to server/.env` and then
+    customize it with your credentials.
 
 **running**:
 
