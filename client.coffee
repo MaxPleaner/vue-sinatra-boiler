@@ -9,10 +9,12 @@
 # attaches the CSS stylesheet to the DOM.
 require("./style/app.sass")
 
-# Deps from NPM
+# NPM deps
 import Vue from 'vue'
+# This app doesn't do anything with Vuex, but the root component is
+# initialized with a store that all child components can access.
 import Vuex from 'vuex'
-mapState = Vuex.mapState
+mapState = Vuex.mapState # helper method to map props to store, unused
 $ = require 'jquery'
 import VueRouter from 'vue-router'
 Cookies = require('cookies-js')
