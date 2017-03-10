@@ -94,13 +94,20 @@ class Server < Sinatra::Base
   end
 
   # Then they authenticate with Github
-  # TODO render a proper HTML page after this not just plaintext
+  #
+  # If the client refreshes the page after logging in, they should have stored
+  # the token in a cookie. If they hit this route with the same token, it
+  # keeps them logged in.
+  #
+  # This needs to be clicked like a regular link - no AJAX
+  #
+  # TODO render a proper HTML page after authenticating not just plaintext
   # saying they can close the window.
 
   get '/authenticate' do
     if token = params["token"]
       if socket = Sockets[token]
-        if !AuthenticatedTokens[token]
+        unless username = AuthenticatedTokens[token]
           authenticate!
           username = get_username
           Users[username] << (token)
