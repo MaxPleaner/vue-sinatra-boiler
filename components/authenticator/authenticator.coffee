@@ -19,3 +19,4 @@ module.exports = load: ({deps: {Vue}}) ->
         e.preventDefault()
         popup = window.open "about:blank", "_blank"
         popup.location = e.currentTarget.href
+      logout: -> AppClient.logout()

@@ -12,11 +12,11 @@ class Routes::Ws
 
   def self.onopen(request, ws)
     token = request.params["token"]
-    unless token
-      ws.close(401, "INVALID TOKEN")
-      return
+    if token
+      Sockets[token] = ws
+    else
+      ws.close
     end
-    Sockets[token] = ws
   end
 
   def self.onmessage(request, ws, msg_data)

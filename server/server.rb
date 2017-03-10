@@ -126,20 +126,23 @@ class Server < Sinatra::Base
     end
   end
 
+  # This is hit over AJAX
+  # This closes the websocket connection
+  # Clients should request a new token and reconnect to ws after logging out
+
   get '/logout' do
+    cross_origin allow_origin: "http://localhost:8080"
     token = params[:token]
     if token
       if username = AuthenticatedTokens[token]
         logout!
-        Sockets[token].send({
-          action: "logged_out"
-        }.to_json)
+        AuthenticatedTokens.delete token
+        Users[username].delete token
+        Sockets[token].close
+        Sockets.delete token
+        { success: "logged out" }.to_json
       else
-        if ws = Sockets[token]
-          ws.send({msg: "can't find user to log out"}.to_json)
-        else
-          {error: "can't find user to log out"}.to_json
-        end
+        { error: "can't find user to log out" }.to_json
       end
     else
       { error: 'cant log out; no token provided' }.to_json

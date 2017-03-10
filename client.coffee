@@ -51,8 +51,10 @@ class Client
   load: ->
     @root = @components.root.activate({ Router: @Router })
     @root.$mount @anchor
+    @init_ws_and_auth()
+  
+  init_ws_and_auth: ->
     @get_token().then @init_websockets
-    window.components = @components
 
   get_token: ->
     new Promise (resolve, reject) =>
@@ -80,12 +82,11 @@ class Client
     @ws.onmessage= (message) =>
       data = JSON.parse(message.data)
       if data.action == 'logged_in'
-        @set_authenticated_state { username: data.username }
+        @login { username: data.username }
       else if data.msg
         console.log data.msg
-    @ws.onclose = (x,y) => (setTimeout =>
-      @init_websockets({token})
-    , 1000)
+    @ws.onclose = (e) =>
+      # TODO reconnect on a loop
 
   # The response will be sent as a "logged_in" action
   try_authenticate: ({token}) ->
@@ -93,14 +94,28 @@ class Client
       action: "try_authenticate"
       token: token
 
-  set_authenticated_state: ({username}) =>
+  login: ({username}) =>
     @auth.done = true
     @auth.username = username
+
+  logout: =>
+    $.get "http://localhost:3000/logout?token=#{@current_token}", (response) =>
+      { success, error } = JSON.parse response
+      if error
+        alert(error)
+      else if success
+        @ws.close()
+        @Cookies.expire 'token'
+        @auth.username = null
+        @auth.done = false
+        @init_ws_and_auth()
 
   # TODO logout
 
 # Start app
-$ -> new Client({deps}).load()
+$ ->
+  window.AppClient = new Client({deps})
+  AppClient.load()
 
 
 
