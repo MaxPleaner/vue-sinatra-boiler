@@ -12,7 +12,7 @@ This is a boilerplate using:
   a ruby html templating library (used to build Vue components' HTML)
 - [Github oauth](https://developer.github.com/v3/oauth/)
   so that users don't have to create a password just for this one site.
-- [Sinatra](www.sinatrarb.com/)
+- [Sinatra](http://www.sinatrarb.com/)
   server using [faye-websockets](https://github.com/faye/faye-websocket-ruby)
   and [thin](https://github.com/macournoyer/thin)
 
@@ -75,7 +75,7 @@ _Server_:
 - Most of the code in [`server/`](./server/)
   is from [sinatra_sockets](http://github.com/maxpleaner/sinatra_sockets),
   another boiler I've made. 
-- See [`server/lib/routes/index.rb`](./server/lib/routes/index.rb)
+- See [`server/ws.rb`](./server/ws.rb)
   for the server's websocket API and [`server/server.rb`](./server/server.rb)
   for routes pertaining to Github oAuth.
 
@@ -133,7 +133,7 @@ _creating a new componenet_
   [`client/components/components.coffee`](./client/components/components.coffee)
 5. It can be attached to the DOM in (at least) these 2 ways:
   1. add a client-side route in
-     [`client/lib/router.rb`](./client/lib/router.rb) then put a `router-link`
+     [`client/lib/router.coffee`](./client/lib/router.coffee) then put a `router-link`
      in some template which links to it. See the navbar tenplate for an example of this.
   2. Add the component's HTML tag to some other component that's being rendered.
      For example, if the component is named `potato` then you can simple write
@@ -142,7 +142,7 @@ _creating a new componenet_
 
 _routing_:
 
-[`client/vue/components/root/`](./client/vue/components/root/) is the layout component.
+[`client/components/root/`](./client/components/root/) is the layout component.
 It renders a `router-view` component which is akin to the `yield` in Rails.
 The routes are declared in [`client/lib/router.coffee`](./client/lib/router.coffee).
 
