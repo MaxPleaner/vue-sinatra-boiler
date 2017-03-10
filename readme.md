@@ -27,15 +27,15 @@ This is a boilerplate using:
   - the `server/` is a separate app and needs to have its dependencies installed
     too. `cd server` and `bundle install` there. - 
   - Create an application on Github developers console. Copy
-    [`server/.env.example`](./server/.env.example) to server/.env` and then
+    [`server/.env.example`](./server/.env.example) to `server/.env` and then
     customize it with your credentials.
 
 **running**:
 
 There are two components, which should be run in separate tabs:
 
-- server (runs config.ru): `cd server; bundle exec thin start`
-- client (runs webpack.config.js): `cd client; npm run dev`
+- server (runs [config.ru](./server/config.ru)): `cd server; bundle exec thin start`
+- client (runs [webpack.config.js](./client/webpack.config.js)): `cd client; npm run dev`
 
 Then visit http://localhost:8080
 
