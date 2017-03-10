@@ -77,6 +77,8 @@ class Client
     @current_token = token
     @ws = new WebSocket "ws://localhost:3000/ws?token=#{token}"
     @ws.onopen = =>
+      @ws_connected = true
+      @ws_connect_interval && clearInterval(@ws_connect_interval)
       @auth.token = @current_token
       @try_authenticate(token: @current_token)
     @ws.onmessage= (message) =>
@@ -86,7 +88,10 @@ class Client
       else if data.msg
         console.log data.msg
     @ws.onclose = (e) =>
-      # TODO reconnect on a loop
+      @ws_connected = false
+      @ws_connect_interval ||= setInterval =>
+        @init_ws_and_auth()
+      , 500
 
   # The response will be sent as a "logged_in" action
   try_authenticate: ({token}) ->
