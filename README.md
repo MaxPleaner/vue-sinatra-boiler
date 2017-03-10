@@ -23,7 +23,7 @@ This is a boilerplate using:
 
 There are two components, which should be run in separate tabs:
 
-  - server (runs config.ru): `cd server; thin start`
+  - server (runs config.ru): `cd server; bundle exec thin start`
   - client (runs webpack.config.js): `npm run dev`
 
 Then visit http://localhost:8080
@@ -32,41 +32,22 @@ Then visit http://localhost:8080
 
 What good is a boiler if the more nuanced details aren't covered in the README?
 
-For reference, here's a tree of this repo:
-
-```txt
-.
-├── client.coffee-------------Entrace to client-side code
-├── components                
-│   ├── components.coffee-----Manifest of Vue components
-│   ├── about-----------------Each Vue component has its own folder with:
-│   │   ├── about.coffee--------a coffee file (for scripting)
-│   │   └── about.slim----------a slim file (for templating)
-│   ├── contact
-│   │   ├── contact.coffee
-│   │   └── contact.slim
-│   ├── navbar
-│   │   ├── navbar.coffee
-│   │   └── navbar.slim
-│   ├── root------------------The layout component (always shown)
-│   │   ├── root.coffee
-│   │   └── root.slim
-│   └── welcome
-│       ├── welcome.coffee
-│       └── welcome.slim
-├── Gemfile-------------------Lists Ruby dependencies such as the slim compiler
-├── index.html----------------HTML page which loads our app via JS
-├── lib
-│   ├── router.coffee---------Client-side routing of path to component
-│   └── store.coffee----------Vuex storage system (some similarity to redux)
-├── package.json--------------NPM dependencies
-├── README.md
-├── server--------------------Ommitted here for brevity, see note below
-├── style
-│   └── app.sass--------------CSS written in Sass
-└── webpack.config.js---------Webpack compiles & serves the app
-
-```
+Here are the roles of various files:
+  - `client.coffee` is the entry point to the client-side code.
+  - `components/components.coffee` is a manifest of components
+  - each component has its own folder in `components/`. They will contain
+    at least 2 files:
+    - a `.slim` file with the HTML template
+    - a `.coffee` file for configuration
+  - `index.html` is served statically by webpack at GET '/'
+  - `lib/router.coffee` maps routes to components.
+  - `lib/store.coffee` is a Vuex store (not used yet)
+  - `server/` is the sinatra backend API
+  - `style/app.sass` is added to the DOM and hot-reloaded
+  - `webpack.config.js` is very important. It extends the behavior of
+     `require` to load non-JS assets and concatenates scripts into
+     `bundle.js` with hot reloading. Furthermore, it acts as a static
+     server for the front end.
 
 _Server_:
 

@@ -1,5 +1,6 @@
 source "http://rubygems.org"
 
+gem 'byebug'
 gem 'sinatra'
 gem 'faye-websocket'
 gem "thin"
