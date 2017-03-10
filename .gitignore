@@ -1,3 +1,5 @@
 node_modules
 server/.env
 .byebug_history
+server/.byebug_history
+.env

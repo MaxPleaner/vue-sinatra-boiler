@@ -1,13 +1,24 @@
-A simple sinatra websocket server with faye/eventmaching
 
-to start: `thin start`
+---
 
-to use command line client, open a new terminal and run `ruby client.rb`.
+This server is adapted from
+[sinatra_sockets](http://github.com/maxpleaner/sinatra_sockets),
+another boiler I made.
 
-To understand what's going on, look at the source code,
-and raise an issue on [the github page](http://github.com/maxpleaner/sinatra_sockets)
-if there's any confusion. 
+---
 
-**required ruby version** `2.3`
+Steps:
 
-**platform** tested only on MRI and unix
+1. bundle
+2. thin start
+
+---
+
+This version has a lot of stuff removed since it's serving no front-end.
+It's just the API for the webpack client
+
+Important files:
+  - websocket stuff in lib/routes/ws.rb
+  - regular routes in server.rb
+
+---

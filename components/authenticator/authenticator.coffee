@@ -14,11 +14,6 @@ module.exports = load: ({deps: {Vue}}) ->
           "#"
         else
           "http://localhost:3000/authenticate?token=#{@token}"  
-      login_text: ->
-        if !@token
-          "1 sec"
-        else
-          "authenticate"
     methods:
       open_in_new_tab: (e) ->
         e.preventDefault()

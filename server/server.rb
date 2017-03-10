@@ -5,19 +5,12 @@
 # Run it with "thin start"
 # ================================================
 
-require 'ostruct' # auto create accessor methods for hash keys
-require 'sinatra/base' # The "modular" version of Sinatra (no global monkeypatch).
-require 'faye/websocket' # Eventmachine-based websocket server
-require 'byebug' # A debugger. Pry has more functionality but can be buggy
-require 'sass' # better than CSS
-require 'coffee_script' # better than JS
-require 'sinatra_auth_github' # Super easy authentication with Github
-require('dotenv'); Dotenv.load # reads env vars from .env
-require 'sinatra/cross_origin' # since the Front end is on another host
-# My gem of Ruby language utils. This in turn requires activesupport,
-# colored, awesome_print, etc.
-# see http://rubygems.org/gems/gemmyrb
-require 'gemmy'
+require 'sinatra/base'
+require 'faye/websocket'
+require 'byebug'
+require 'sinatra_auth_github'
+require('dotenv'); Dotenv.load
+require 'sinatra/cross_origin'
 
 # Requires all ruby files in this directory.
 # Orders them by the count of "/" in their filename.
@@ -30,6 +23,7 @@ require 'gemmy'
 # If there is the situation where a class depends on another that is in a 
 # deeper-nested file, there's always the option to pass the dependency at
 # runtime.
+
 Dir.glob("./**/*.rb").sort_by { |x| x.count("/") }.each do |path|
   require path
 end
@@ -46,12 +40,10 @@ end
 # 1. Client hits GET /token, gets a new token
 # 2. Client sends token with websocket connection request at GET /ws
 # 3. Client hits GET /authenticate and goes through Github oAuth login
-# 4. Github sends callback to server, which alerts client over websocket
-#    - Client is now authenticated and saves token in first-party cookie
-#    - Client can now make requests to restricted routes with their token
+# 4. Github sends callback to server, which sends the OK to client over websocket
 
 # In leue of sessions, three global objects are used:
-#   Users: <Hash> with keys: <username> and vals: <set> of tokens
+#   Users: <Hash> with keys: <username> and vals: <Set(token)>
 #   AuthenticatedTokens: <hash> with keys: <token> and vals: <username>
 #   Sockets: <hash> with keys: <token> and vals: <socket>
 
@@ -61,26 +53,26 @@ Users = Hash.new { |hash, key| hash[key] = Set.new }
 
 class Server < Sinatra::Base
 
-
-  # Thin server works well with faye-websockets
   set :server, 'thin'
   Faye::WebSocket.load_adapter('thin')
 
   # Allow some routes to be accessed from different origins
   # This is unnecessary for websocket requests, since browsers don't implement
   # the same restictions.
+
   register Sinatra::CrossOrigin
 
   # Github oAuth setup
+  # session is needed for the Github oAuth gem
+  # but its not used elsewhere
+
+  enable :sessions
   set :github_options, {
     scopes: "user",
     secret: ENV["GITHUB_CLIENT_SECRET"],
     client_id: ENV["GITHUB_CLIENT_ID"]
   }
   register Sinatra::Auth::Github
-  # session is needed for the Github oAuth gem
-  # but its not used elsewhere
-  enable :sessions
   
   # ------------------------------------------------
   # Standard HTTP routes
@@ -88,6 +80,7 @@ class Server < Sinatra::Base
   # ------------------------------------------------
 
   # First clients request a token
+
   get '/token' do
     cross_origin allow_origin: "http://localhost:8080"
     { token: new_token }.to_json
@@ -95,6 +88,7 @@ class Server < Sinatra::Base
 
   # Then they send it in websocket connection request
   # See server/lib/routes/ws.rb
+
   get '/ws' do
     Routes::Ws.run(request)
   end
@@ -102,11 +96,13 @@ class Server < Sinatra::Base
   # Then they authenticate with Github
   # TODO render a proper HTML page after this not just plaintext
   # saying they can close the window.
+
   get '/authenticate' do
     if token = params["token"]
       if socket = Sockets[token]
         if !AuthenticatedTokens[token]
           authenticate!
+          username = get_username
           Users[username] << (token)
           AuthenticatedTokens[token] = username
         end
@@ -124,17 +120,28 @@ class Server < Sinatra::Base
   end
 
   get '/logout' do
-    Users.delete username
-    session.delete "username"
-    logout!
-    Sockets[token].send({
-      action: "logged_out"  
-    })
+    token = params[:token]
+    if token
+      if username = AuthenticatedTokens[token]
+        logout!
+        Sockets[token].send({
+          action: "logged_out"
+        }.to_json)
+      else
+        if ws = Sockets[token]
+          ws.send({msg: "can't find user to log out"}.to_json)
+        else
+          {error: "can't find user to log out"}.to_json
+        end
+      end
+    else
+      { error: 'cant log out; no token provided' }.to_json
+    end
   end
 
   private
 
-  def username
+  def get_username
     github_user.login
   end
 
