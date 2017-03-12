@@ -16,6 +16,8 @@ deps = { Vue, $, Vuex, mapState, mapActions, VueRouter, Cookies }
 # ------------------------------------------------
 
 Object.assign deps,
+  CrudMapper: require("./lib/crud_mapper").load { deps }
+Object.assign deps,
   Store: require('./lib/store').load { deps }
 Object.assign deps,
   components: require('./components/components').load { deps }

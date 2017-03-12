@@ -1,5 +1,8 @@
 module.exports = load: ({deps}) ->
-  ADD_TODO: (state, {text}) -> 
-    state.todos.push {text}
+  CREATE_TODO: (state, record) -> 
+    state.todos.push record
+  DESTROY_TODO: (state, record) -> 
+    debugger
+    delete state.todos[record]
 
 

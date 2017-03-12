@@ -1,2 +1,7 @@
 div#todos
-  b todo: add todos crud
+  input type='text' @keyup.enter='create_todo' placeholder='add todo'
+  ul
+    li v-for='todo in todos'
+      span = "{{ todo.text }}"
+      button @click='delete_todo(todo)' delete
+

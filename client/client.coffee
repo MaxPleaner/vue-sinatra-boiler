@@ -7,10 +7,13 @@ module.exports = class Client
     @anchor = @$("#vue-anchor")[0]
 
   init: ->
-    @root.$mount @anchor
+    @attach_vue_to_dom()
     @init_ws_and_auth()
     @attach_stylesheet_to_dom()
   
+  attach_vue_to_dom: ->
+    @root.$mount @anchor
+    
   attach_stylesheet_to_dom: ->
     require("./style/app.sass")
 

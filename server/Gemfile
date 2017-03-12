@@ -8,3 +8,7 @@ gem 'sinatra_auth_github'
 gem 'dotenv'
 gem 'sinatra-cross_origin'
 gem "rack-proxy"
+gem "sinatra-activerecord"
+gem "sqlite3"
+gem "rake"
+gem 'activesupport'

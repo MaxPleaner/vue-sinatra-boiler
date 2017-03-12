@@ -6,27 +6,17 @@
 # ================================================
 
 require 'sinatra/base'
+require "sinatra/activerecord"
 require 'faye/websocket'
 require 'byebug'
 require 'sinatra_auth_github'
 require('dotenv'); Dotenv.load
 require 'sinatra/cross_origin'
+require 'active_support/all'
 
-# Requires all ruby files in this directory.
-# Orders them by the count of "/" in their filename.
-# Therefore, shallower files are loaded first.
-# The reasoning for this is to support the common convention of naming
-# files according to their contained class hierarchies.
-# i.e. class Foo would be in foo.rb,
-#      class Foo::Bar would be in foo/bar.rb,
-#
-# If there is the situation where a class depends on another that is in a 
-# deeper-nested file, there's always the option to pass the dependency at
-# runtime.
-
-Dir.glob("./**/*.rb").sort_by { |x| x.count("/") }.each do |path|
-  require path
-end
+require './crud_generator'
+require './models'
+require './ws'
 
 # The REST routes (listed in this file) cannot store information in the session
 # since it's on another host.
@@ -54,10 +44,9 @@ end
 # When a 
 #
 # 1. Client hits GET /logout
-# 2. Server closes all ws connections for that token and sends a specific exit code (401)
+# 2. Server closes all ws connections for that token and sends a specific exit code (4567) to indicate
+#    actual logout versus temporary disconnection
 # 3. Client checks for this exit code in the onclose handler, clears cookie and inits login flow
-#
-# TODO communication between tabs without websockets so that logins don't require other tabs to be reloaded.
 #
 # In leue of sessions, three global objects are used:
 #   Users: <Hash> with keys: <username> and vals: <Set(token)>
@@ -70,6 +59,8 @@ Users = Hash.new { |hash, key| hash[key] = Set.new }
 
 class Server < Sinatra::Base
 
+  register Sinatra::ActiveRecordExtension
+  set :database, {adapter: "sqlite3", database: "foo.sqlite3"}
   set :server, 'thin'
   Faye::WebSocket.load_adapter('thin')
 
@@ -94,6 +85,15 @@ class Server < Sinatra::Base
   # Standard HTTP routes
   # (get '/ws' is the entrance to the websocket API)
   # ------------------------------------------------
+
+  register Sinatra::CrudGenerator
+  crud_generate(
+    resource: "todo",
+    resource_class: Todo,
+    cross_origin_opts: {
+      allow_origin: "http://localhost:8080"
+    }
+  )
 
   get '/token' do
     cross_origin allow_origin: "http://localhost:8080"

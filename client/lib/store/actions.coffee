@@ -1,5 +1,3 @@
-module.exports = load: ({deps}) ->
-  add_todo: ({commit}, {text}) ->
-    new Promise (resolve, reject) ->
-      commit("ADD_TODO", {text})
-      resolve(text)
+module.exports = load: ({deps: {CrudMapper}}) ->
+  CrudMapper.add_store_actions
+    resource: "todo"
