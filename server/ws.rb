@@ -13,7 +13,7 @@ class Ws
   def self.onopen(request, ws)
     token = request.params["token"]
     if token
-      Sockets[token] = ws
+      Sockets[token] << ws
     else
       ws.close
     end

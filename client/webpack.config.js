@@ -1,25 +1,12 @@
-
-// # ================================================
-//   Webpack is a highly-capable static server
-//   It tracks dependencies using 'require'
-//   And does on-the-fly compilation / hot reloads
-//
-//   It's used here to serve the root index.html file
-//   and to keep the bundle.js up to date.
-// # ================================================
-
 // Little hack so that that coffee-loader uses coffee 2
 var coffeescript = require('coffee-script')
 require.cache[require.resolve('coffee-script')] = require.cache[require.resolve('coffeescript')]
 
 module.exports = {
 
-  // client side entrance to code
-
-  entry: "./client.coffee",
+  entry: "./loader.coffee",
 
   // the bundle is stored in memory, though it's referenced by this path
-
   output: {
     filename: "bundle.js"
   },
@@ -48,10 +35,6 @@ module.exports = {
     ]
   },
 
-  // Vue is aliased in order to load the compiler
-  // by default only the runtime is loaded.
-  // This can all be done on the client though.
-
   resolve: {
     extensions: [".js", ".coffee", ".slim", ".sass", ".css"],
     alias: {
@@ -60,10 +43,6 @@ module.exports = {
   },
 
   // Starts a static server with index.html at root 
-
   context: __dirname,
-
-  plugins: [
-  ]
 
 };

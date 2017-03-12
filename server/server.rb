@@ -35,19 +35,36 @@ end
 # This is the :token param, and is required on all routes except for
 # /token
 #
-# Here's an outline of the flow:
+# Here's an outline of the login flow:
 #
-# 1. Client hits GET /token, gets a new token
-# 2. Client sends token with websocket connection request at GET /ws
+# 1. Client hits GET /token, gets a new token and stores in 1st party cookie (not accessible from server)
+# 2. Client sends token as query param with websocket connection request at GET /ws
 # 3. Client hits GET /authenticate and goes through Github oAuth login
-# 4. Github sends callback to server, which sends the OK to client over websocket
-
+#    - if a token was already in their cookie they attempt to alidaa
+# 4. Github sends callback to server, which sends a new authenticated token to client over websocket via the "logged_in" message
+# 5. If client refreshes page and token is in cookie, steps 3-4 happen automatically. Otherwise step 3 is triggered by a button.
+#
+# Note that since clients might have multiple tabs open, they continually listen for the ws "logged_in" event
+# and use it to update their in-memory token. For example, if a second tab is opened then the login flow will trigger
+# the new tab's socket to be authenticated and a new token generated. The first tab's in-memory token is now invalid, but since
+# it's listening for "logged_in" it will be able to receive the new token.
+#
+# The logout flow accounts for the possibility that the client has multiple tabs open.
+# Each tab would share a token since it's stored in a client-side cookie, but they would have unique socket objects.
+# When a 
+#
+# 1. Client hits GET /logout
+# 2. Server closes all ws connections for that token and sends a specific exit code (401)
+# 3. Client checks for this exit code in the onclose handler, clears cookie and inits login flow
+#
+# TODO communication between tabs without websockets so that logins don't require other tabs to be reloaded.
+#
 # In leue of sessions, three global objects are used:
 #   Users: <Hash> with keys: <username> and vals: <Set(token)>
 #   AuthenticatedTokens: <hash> with keys: <token> and vals: <username>
-#   Sockets: <hash> with keys: <token> and vals: <socket>
+#   Sockets: <hash> with keys: <token> and vals: <Set(socket)>
 
-Sockets = {}
+Sockets = Hash.new { |hash, key| hash[key] = Set.new }
 AuthenticatedTokens = {}
 Users = Hash.new { |hash, key| hash[key] = Set.new }
 
@@ -56,15 +73,14 @@ class Server < Sinatra::Base
   set :server, 'thin'
   Faye::WebSocket.load_adapter('thin')
 
-  # Allow some routes to be accessed from different origins
+  # Allow some routes to be accessed from different origins.
   # This is unnecessary for websocket requests, since browsers don't implement
   # the same restictions.
 
   register Sinatra::CrossOrigin
 
   # Github oAuth setup
-  # session is needed for the Github oAuth gem
-  # but its not used elsewhere
+  # session is needed for the Github oAuth gem, but its not used elsewhere
 
   enable :sessions
   set :github_options, {
@@ -79,44 +95,43 @@ class Server < Sinatra::Base
   # (get '/ws' is the entrance to the websocket API)
   # ------------------------------------------------
 
-  # First clients request a token
-
   get '/token' do
     cross_origin allow_origin: "http://localhost:8080"
     { token: new_token }.to_json
   end
 
-  # Then they send it in websocket connection request
   # See ws.rb
-
   get '/ws' do
     Ws.run(request)
   end
 
-  # Then they authenticate with Github
-  #
-  # If the client refreshes the page after logging in, they should have stored
-  # the token in a cookie. If they hit this route with the same token, it
-  # keeps them logged in.
-  #
-  # This needs to be clicked like a regular link - no AJAX
-  #
   # TODO render a proper HTML page after authenticating not just plaintext
   # saying they can close the window.
-
   get '/authenticate' do
-    if token = params["token"]
-      if socket = Sockets[token]
-        unless username = AuthenticatedTokens[token]
+    username = nil
+    token = params["token"]
+    if token
+      sockets = Sockets[token]
+      if sockets.any?
+        username = AuthenticatedTokens[token]
+        unless username
           authenticate!
           username = get_username
-          Users[username] << (token)
           AuthenticatedTokens[token] = username
         end
-        socket.send({
-          action: "logged_in",
-          username: username
-        }.to_json)
+        # Refresh the token
+        new_token = SecureRandom.urlsafe_base64
+        Sockets[new_token] = Sockets.delete(token)
+        AuthenticatedTokens[new_token] = AuthenticatedTokens.delete(token)
+        Users[username] << new_token
+        # Send the new token which is authenticated
+        sockets.each do |socket|
+          socket.send({
+            action: "logged_in",
+            username: username,
+            new_token: new_token
+          }.to_json)
+        end
         "authenticated as #{username}. (this window can be closed)"
       else
         "error. lost your websocket connection (this window can be closed)"
@@ -126,10 +141,32 @@ class Server < Sinatra::Base
     end
   end
 
+  # Disable all of a users tokens
+  get '/logout_all_devices' do
+    cross_origin allow_origin: "http://localhost:8080"
+    token = params[:token]
+    if token
+      if username = AuthenticatedTokens[token]
+        logout!
+        tokens = Users[username]
+        tokens.each do |user_token|
+          AuthenticatedTokens.delete user_token
+          Sockets[user_token].each { |ws| ws.close(401, "logged out") }
+          Sockets.delete user_token
+        end
+        Users[username].clear
+        { success: "logged out" }.to_json
+      else
+        { error: "can't find user to log out" }.to_json
+      end
+    else
+      { error: 'cant log out; no token provided' }.to_json
+    end
+  end
+
   # This is hit over AJAX
   # This closes the websocket connection
-  # Clients should request a new token and reconnect to ws after logging out
-
+  # Logs out all tabs sharing a token (which is almost certainly all their tabs)
   get '/logout' do
     cross_origin allow_origin: "http://localhost:8080"
     token = params[:token]
@@ -138,7 +175,7 @@ class Server < Sinatra::Base
         logout!
         AuthenticatedTokens.delete token
         Users[username].delete token
-        Sockets[token].close
+        Sockets[token].each { |ws| ws.close(1000, "logged_out") }
         Sockets.delete token
         { success: "logged out" }.to_json
       else
