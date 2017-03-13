@@ -1,2 +1,2 @@
 module.exports = load: ({deps}) ->
-  todos: []
+  todos: {}

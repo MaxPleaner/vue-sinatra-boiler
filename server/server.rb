@@ -96,7 +96,6 @@ class Server < Sinatra::Base
   )
 
   get '/token' do
-    cross_origin allow_origin: "http://localhost:8080"
     { token: new_token }.to_json
   end
 
@@ -143,7 +142,6 @@ class Server < Sinatra::Base
 
   # Disable all of a users tokens
   get '/logout_all_devices' do
-    cross_origin allow_origin: "http://localhost:8080"
     token = params[:token]
     if token
       if username = AuthenticatedTokens[token]
@@ -168,7 +166,6 @@ class Server < Sinatra::Base
   # This closes the websocket connection
   # Logs out all tabs sharing a token (which is almost certainly all their tabs)
   get '/logout' do
-    cross_origin allow_origin: "http://localhost:8080"
     token = params[:token]
     if token
       if username = AuthenticatedTokens[token]

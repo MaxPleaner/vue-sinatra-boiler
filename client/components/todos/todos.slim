@@ -1,7 +1,8 @@
 div#todos
   input type='text' @keyup.enter='create_todo' placeholder='add todo'
   ul
-    li v-for='todo in todos'
-      span = "{{ todo.text }}"
-      button @click='delete_todo(todo)' delete
+    template v-for='(todo, id) in todos' 
+      li
+        span = "{{ todo.text }}"
+        button @click='delete_todo(todo)' delete
 
