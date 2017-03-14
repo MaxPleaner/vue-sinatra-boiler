@@ -8,7 +8,7 @@ module.exports = {
 
   // the bundle is stored in memory, though it's referenced by this path
   output: {
-    filename: "./dist/prod-bundle.js"
+    filename: "../client-dist/prod-bundle.js"
   },
 
   // Outline of loaders:
