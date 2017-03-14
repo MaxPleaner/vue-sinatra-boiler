@@ -132,9 +132,11 @@ The front end is easy to deploy to Github pages or another host like that.
 4. `sh push_client_dist_to_gh_pages` will push the `client-dist/` folder to 
    the gh-pages branch of whatever origin the repo points to.
 
-The server is easy to deploy to heroku. It comes with a Procfile so `heroku create`
-and `git push heroku master` should be all that's necessary. There's conditional logic
-throughout the app to behave differently if the RACK_ENV=production
+The server includes a Procfile so it's easy to deploy to heroku.
+
+1. `heroku create --app <some app name>`
+2. `sh push_server_to_heroku`
+3. `heroku run rake db:migrate`
 
 ### Todos
 

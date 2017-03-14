@@ -27,9 +27,6 @@ class Server < Sinatra::Base
   register Sinatra::ActiveRecordExtension
 
   if ENV["RACK_ENV"] == "production"
-    set :database, {adapter: "sqlite3", database: "db.sqlite3"}
-    set :show_exceptions, true
-  else
     configure :production do
      db = URI.parse(ENV['DATABASE_URL'] || 'postgres:///localhost/mydb')
      ActiveRecord::Base.establish_connection(
@@ -41,6 +38,9 @@ class Server < Sinatra::Base
        :encoding => 'utf8'
      )
     end
+  else
+    set :database, {adapter: "sqlite3", database: "db.sqlite3"}
+    set :show_exceptions, true
   end
 
   set :server, 'thin'
