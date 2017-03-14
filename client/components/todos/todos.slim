@@ -3,6 +3,6 @@ div#todos
   ul
     template v-for='(todo, id) in todos' 
       li
-        span = "{{ todo.text }}"
+        input type='text' @keyup.enter='update_todo($event, todo)' :value='todo.text'
         button @click='delete_todo(todo)' delete
 

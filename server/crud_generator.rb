@@ -133,7 +133,7 @@ module Sinatra
               found.send(:"#{key}=", params[key])
             end
             if found.valid?
-              found.update
+              found.update({})
               { success: found.public_attributes }.to_json
             else
               { error: found.errors.full_messages }.to_json
