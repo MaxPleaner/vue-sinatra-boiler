@@ -122,6 +122,20 @@ Some important concepts to keep in mind:
 └── ws.rb -------------------------- The websocket API
 ```
 
+#### deploying
+
+The front end is easy to deploy to Github pages or another host like that.
+
+1. `cd client`
+2. `npm run deploy` - this will generate `client-dist/prod-bundle.js`
+3. commit changes
+4. `sh push_client_dist_to_gh_pages` will push the `client-dist/` folder to 
+   the gh-pages branch of whatever origin the repo points to.
+
+The server is easy to deploy to heroku. It comes with a Procfile so `heroku create`
+and `git push heroku master` should be all that's necessary. There's conditional logic
+throughout the app to behave differently if the RACK_ENV=production
+
 ### Todos
 
 Extract the Crud generators and server push into their own libraries

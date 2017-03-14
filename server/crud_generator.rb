@@ -46,7 +46,7 @@ module Sinatra
         # Each individual route still needs to state a CORS policy if it has one.
         before do
           if request.request_method == 'OPTIONS'
-            response.headers["Access-Control-Allow-Origin"] = "http://localhost:8080"
+            response.headers["Access-Control-Allow-Origin"] = CLIENT_BASE_URL
             response.headers["Access-Control-Allow-Methods"] = "POST,DELETE,PUT,GET"
             halt 200
           end

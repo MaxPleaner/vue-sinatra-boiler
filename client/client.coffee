@@ -1,5 +1,31 @@
 module.exports = class Client
 
+# ------------------------------------------------
+# Setup and private vars
+# ------------------------------------------------
+
+  prod_base_url = "vue-sinatra-boiler-demo.herokuapp.com"
+  dev_base_url = "localhost:3000"
+
+  base_url = if process.env.NODE_ENV == "production" 
+    "https://#{prod_base_url}"
+  else
+    "http://#{dev_base_url}"
+
+  ws_base_url = if process.env.NODE_ENV == "production"
+    "wss://#{prod_base_url}"
+  else
+    "ws://#{dev_base_url}"
+
+
+# ------------------------------------------------
+# The exported object
+# ------------------------------------------------
+
+  base_url: base_url
+
+  ws_base_url: ws_base_url
+
   constructor: ({deps}) ->
     {
       @Cookies, @components, @root_constructor,
@@ -34,14 +60,14 @@ module.exports = class Client
     @Cookies.get "token"
 
   new_credentials_or_token_from_server: (callback) ->
-     @$.get "http://localhost:3000/token", (response) ->
+     @$.get "#{@base_url}/token", (response) ->
       { token } = JSON.parse response
       callback({ token })
 
   init_websockets: ({token}) =>
     @Cookies.set("token", token)
     @Store.commit("SET_TOKEN", token)
-    @ws = new WebSocket "ws://localhost:3000/ws?token=#{token}"
+    @ws = new WebSocket "#{@ws_base_url}/ws?token=#{token}"
     @ws.onopen = @ws_onopen
     @ws.onmessage = @ws_onmessage
     @ws.onclose = @ws_onclose
@@ -86,14 +112,14 @@ module.exports = class Client
     @Store.commit("SET_USERNAME", username)
 
   logout: =>
-    @$.get "http://localhost:3000/logout?token=#{@Store.state.token}", (response) =>
+    @$.get "#{@base_url}/logout?token=#{@Store.state.token}", (response) =>
       { success, error } = JSON.parse response
       if error
         alert(error)
       # The success case isn't handled here - it's handled in "onclose" on the websocket
 
   logout_all_devices: =>
-    @$.get "http://localhost:3000/logout_all_devices?token=#{@current_token}", (response) =>
+    @$.get "#{@base_url}/logout_all_devices?token=#{@current_token}", (response) =>
       { success, error } = JSON.parse response
       if error
         alert(error)

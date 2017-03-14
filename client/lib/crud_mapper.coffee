@@ -58,7 +58,7 @@ module.exports = load: ({deps: {$, Vue}}) ->
 
       @resources.add(resource)
 
-      root_path ||= "http://localhost:3000/"
+      root_path ||= AppClient.base_url
 
       index ||= {}
       index = Object.assign {method: "get", path: "#{resource}s"}, index

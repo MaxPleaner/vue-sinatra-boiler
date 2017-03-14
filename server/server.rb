@@ -16,10 +16,33 @@ Users = Hash.new { |hash, key| hash[key] = Set.new }
 AuthenticatedTokens = {}
 Sockets = Hash.new { |hash, key| hash[key] = Set.new }
 
+CLIENT_BASE_URL = if ENV["RACK_ENV"] == "production"
+  "https://maxpleaner.github.io/vue-sinatra-boiler"
+else
+  "http://localhost:8080"
+end
+
 class Server < Sinatra::Base
 
   register Sinatra::ActiveRecordExtension
-  set :database, {adapter: "sqlite3", database: "db.sqlite3"}
+
+  if ENV["RACK_ENV"] == "production"
+    set :database, {adapter: "sqlite3", database: "db.sqlite3"}
+    set :show_exceptions, true
+  else
+    configure :production do
+     db = URI.parse(ENV['DATABASE_URL'] || 'postgres:///localhost/mydb')
+     ActiveRecord::Base.establish_connection(
+       :adapter  => db.scheme == 'postgres' ? 'postgresql' : db.scheme,
+       :host     => db.host,
+       :username => db.user,
+       :password => db.password,
+       :database => db.path[1..-1],
+       :encoding => 'utf8'
+     )
+    end
+  end
+
   set :server, 'thin'
   Faye::WebSocket.load_adapter('thin')
 
@@ -47,7 +70,7 @@ class Server < Sinatra::Base
     resource: "todo",
     resource_class: Todo,
     cross_origin_opts: {
-      allow_origin: "http://localhost:8080"
+      allow_origin: CLIENT_BASE_URL
     },
     create: { auth: logged_in_only },
     update: { auth: logged_in_only },
@@ -55,7 +78,7 @@ class Server < Sinatra::Base
   )
 
   get '/token' do
-    cross_origin allow_origin: "http://localhost:8080"
+    cross_origin allow_origin: CLIENT_BASE_URL
     { token: new_token }.to_json
   end
 
@@ -100,7 +123,7 @@ class Server < Sinatra::Base
   end
 
   get '/logout_all_devices' do
-    cross_origin allow_origin: "http://localhost:8080"
+    cross_origin allow_origin: CLIENT_BASE_URL
     token = params[:token]
     if token
       if username = AuthenticatedTokens[token]
@@ -122,7 +145,7 @@ class Server < Sinatra::Base
   end
 
   get '/logout' do
-    cross_origin allow_origin: "http://localhost:8080"
+    cross_origin allow_origin: CLIENT_BASE_URL
     token = params[:token]
     if token
       if username = AuthenticatedTokens[token]

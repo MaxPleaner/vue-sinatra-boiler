@@ -30,6 +30,7 @@ GEM
     multipart-post (2.0.0)
     octokit (4.6.2)
       sawyer (~> 0.8.0, >= 0.5.3)
+    pg (0.19.0)
     public_suffix (2.0.5)
     rack (1.6.5)
     rack-protection (1.5.3)
@@ -78,6 +79,7 @@ DEPENDENCIES
   byebug
   dotenv
   faye-websocket
+  pg
   rack-proxy
   rake
   sinatra

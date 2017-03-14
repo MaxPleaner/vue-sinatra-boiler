@@ -7,7 +7,7 @@ module.exports = load: ({deps: {Vue, mapState}}) ->
         if !@token
           "#"
         else
-          "http://localhost:3000/authenticate?token=#{@token}"        
+          "#{AppClient.base_url}/authenticate?token=#{@token}"        
     methods:
       open_in_new_tab: (e) ->
         e.preventDefault()
