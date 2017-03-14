@@ -17,7 +17,7 @@ AuthenticatedTokens = {}
 Sockets = Hash.new { |hash, key| hash[key] = Set.new }
 
 CLIENT_BASE_URL = if ENV["RACK_ENV"] == "production"
-  "https://maxpleaner.github.io/vue-sinatra-boiler"
+  "https://maxpleaner.github.io"
 else
   "http://localhost:8080"
 end
