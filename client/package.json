@@ -1,15 +1,16 @@
 {
-  "name": "vue-webpack-coffee-slim-boiler",
-  "version": "1.0.0",
-  "description": "",
+  "name": "vue-sinatra-boiler",
+  "version": "0.1.0",
+  "description": "boiler plate with vue, sinatra, and some other stuff",
   "main": "index.js",
   "scripts": {
     "dev": "./node_modules/.bin/webpack-dev-server --content-base . --inline --hot",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "NODE_ENV=production webpack -p --config webpack.production.config.js"
   },
-  "author": "",
+  "author": "maxpleaner",
   "license": "ISC",
-  "dependencies": {
+  "devDependencies": {
     "coffee-loader": "^0.7.3",
     "coffee-script": "^1.12.4",
     "coffeescript": "^2.0.0-alpha1",

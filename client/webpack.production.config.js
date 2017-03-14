@@ -8,7 +8,7 @@ module.exports = {
 
   // the bundle is stored in memory, though it's referenced by this path
   output: {
-    filename: "bundle.js"
+    filename: "./dist/prod-bundle.js"
   },
 
   // Outline of loaders:
@@ -32,8 +32,7 @@ module.exports = {
       {test: /\.slim$/, loader: ['slim-lang-loader']},
       {test: /\.coffee$/, loader: 'coffee-loader'},
       {test: /\.sass$/, loader: "style-loader!css-loader!sass-loader" },
-      {exclude: [node_modules_dir]}
-
+      {exclude: ["./node_modules"]}
     ]
   },
 
