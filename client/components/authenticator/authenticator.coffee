@@ -1,19 +1,13 @@
-module.exports = load: ({deps: {Vue}}) ->
-
-  shared_data =
-    token: null
-    done: false
-    username: null
+module.exports = load: ({deps: {Vue, mapState}}) ->
 
   Vue.component "authenticator",
     template: require('html-loader!./authenticator.slim')
-    data: -> shared_data
-    computed:
+    computed: Object.assign mapState(['token', 'username', 'logged_in']),
       authenticate_url: ->
         if !@token
           "#"
         else
-          "http://localhost:3000/authenticate?token=#{@token}"  
+          "http://localhost:3000/authenticate?token=#{@token}"        
     methods:
       open_in_new_tab: (e) ->
         e.preventDefault()

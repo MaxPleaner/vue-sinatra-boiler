@@ -15,6 +15,7 @@ require 'sinatra/cross_origin'
 require 'active_support/all'
 
 require './crud_generator'
+require './server_push'
 require './models'
 require './ws'
 
@@ -48,14 +49,14 @@ require './ws'
 #    actual logout versus temporary disconnection
 # 3. Client checks for this exit code in the onclose handler, clears cookie and inits login flow
 #
-# In leue of sessions, three global objects are used:
+# In leue of sessions, four global objects are used:
 #   Users: <Hash> with keys: <username> and vals: <Set(token)>
 #   AuthenticatedTokens: <hash> with keys: <token> and vals: <username>
 #   Sockets: <hash> with keys: <token> and vals: <Set(socket)>
 
-Sockets = Hash.new { |hash, key| hash[key] = Set.new }
-AuthenticatedTokens = {}
 Users = Hash.new { |hash, key| hash[key] = Set.new }
+AuthenticatedTokens = {}
+Sockets = Hash.new { |hash, key| hash[key] = Set.new }
 
 class Server < Sinatra::Base
 
@@ -92,10 +93,11 @@ class Server < Sinatra::Base
     resource_class: Todo,
     cross_origin_opts: {
       allow_origin: "http://localhost:8080"
-    }
+    },
   )
 
   get '/token' do
+    cross_origin allow_origin: "http://localhost:8080"
     { token: new_token }.to_json
   end
 
@@ -142,6 +144,7 @@ class Server < Sinatra::Base
 
   # Disable all of a users tokens
   get '/logout_all_devices' do
+    cross_origin allow_origin: "http://localhost:8080"
     token = params[:token]
     if token
       if username = AuthenticatedTokens[token]
@@ -166,6 +169,7 @@ class Server < Sinatra::Base
   # This closes the websocket connection
   # Logs out all tabs sharing a token (which is almost certainly all their tabs)
   get '/logout' do
+    cross_origin allow_origin: "http://localhost:8080"
     token = params[:token]
     if token
       if username = AuthenticatedTokens[token]

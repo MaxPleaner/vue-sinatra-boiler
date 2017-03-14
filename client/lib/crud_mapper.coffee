@@ -1,14 +1,34 @@
 module.exports = load: ({deps: {$, Vue}}) ->
 
+  # ------------------------------------------------
+  # These are private methods / helpers
+  # ------------------------------------------------
+
   # Add $.put and $.delete methods
   jquery_extensions = require("./jquery_extensions").load {$}
   Object.assign $,
     delete: jquery_extensions.delete
     put: jquery_extensions.put
 
-  add_mutations: ({resource, plural_resource}) =>
+  # ------------------------------------------------
+  # This is the public api
+  # ------------------------------------------------
+
+  # tracks which were added
+  resources: new Set()
+
+  # call from ws onopen or something like that
+  get_indexes: ->
+    @resources.forEach (resource) ->
+      AppClient.Store.dispatch("index_#{resource}")
+
+  # call this in the mutations file
+  add_mutations: ({resource, plural_resource}) ->
     upcase_resource = resource.toUpperCase()
     plural_resource ||= resource + "s"
+    "INDEX_#{upcase_resource}": (state, records) ->
+      records.forEach (record) ->
+        Vue.set(state[plural_resource], record.id, record)
     "CREATE_#{upcase_resource}": (state, record) -> 
       Vue.set(state[plural_resource], record.id, record)
     "UPDATE_#{upcase_resource}": (state, record) -> 
@@ -16,14 +36,50 @@ module.exports = load: ({deps: {$, Vue}}) ->
     "DESTROY_#{upcase_resource}": (state, record) -> 
       Vue.delete(state[plural_resource], record.id)
 
+  # call this from the ws onmessage handler
+  process_ws_message: ({action, type, record}) ->
+    switch action
+      when "add_record"
+        AppClient.Store.commit("CREATE_#{type.toUpperCase()}", record)
+      when "update_record"
+        AppClient.Store.commit("UPDATE_#{type.toUpperCase()}", record)
+      when "destroy_record"
+        AppClient.Store.commit("DESTROY_#{type.toUpperCase()}", record)
 
-  add_store_actions: ({resource, root_path, index, create, read, update, destroy}) =>
+  # call this from the actions file
+  add_store_actions: ({
+    resource, root_path,                                        # strings
+    index, create, read, update, destroy,                       # objects
+  }) ->
+
+    @resources.add(resource)
+
     root_path ||= "http://localhost:3000/"
-    index     ||= method: "get",    path: "#{resource}s"
-    create    ||= method: "post",   path: "#{resource}s"
-    read      ||= method: "get",    path: "#{resource}"
-    update    ||= method: "put",    path: "#{resource}"
-    destroy   ||= method: "delete", path: "#{resource}"
+
+    index ||= {}
+    index = Object.assign {method: "get", path: "#{resource}s"}, index
+
+    create ||= {}
+    create = Object.assign {method: "post", path: "#{resource}s"}, create
+
+    read ||= {}
+    read = Object.assign {method: "get", path: "#{resource}"}, read
+
+    update ||= {}
+    update = Object.assign {method: "put", path: "#{resource}"}, update
+
+    destroy ||= {}
+    destroy = Object.assign {method: "delete", path: "#{resource}"}, destroy
+
+    "index_#{resource}": ({commit}) -> new Promise (resolve, reject) =>
+      $[index.method] "#{root_path}#{index.path}", {}, (response) ->
+        {success, errors} = JSON.parse(response)
+        if success
+          commit("INDEX_#{resource.toUpperCase()}", success)
+          # Success object here is a list of records
+          resolve(success)
+        else
+          reject(errors)
     
     "create_#{resource}": ({commit}, body) -> new Promise (resolve, reject) =>
       $[create.method] "#{root_path}#{create.path}", body, (response) ->

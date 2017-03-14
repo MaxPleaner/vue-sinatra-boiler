@@ -1,9 +1,11 @@
 module.exports = class Client
 
   constructor: ({deps}) ->
-    { @Cookies, @components, @root_constructor, @Router, @Store, @$ } = deps
+    {
+      @Cookies, @components, @root_constructor,
+      @Router, @Store, @$, @CrudMapper
+    } = deps
     @root = @root_constructor.activate({ @Router, @components })
-    @auth = new @components.authenticator()
     @anchor = @$("#vue-anchor")[0]
 
   init: ->
@@ -38,33 +40,36 @@ module.exports = class Client
 
   init_websockets: ({token}) =>
     @Cookies.set("token", token)
-    @current_token = token
+    @Store.commit("SET_TOKEN", token)
     @ws = new WebSocket "ws://localhost:3000/ws?token=#{token}"
     @ws.onopen = @ws_onopen
     @ws.onmessage = @ws_onmessage
     @ws.onclose = @ws_onclose
 
   ws_onopen: =>
+    @CrudMapper.get_indexes()
     @ws_connect_interval && clearInterval(@ws_connect_interval)
-    @auth.token = @current_token
     if @token_was_in_cookie
-      @try_authenticate(token: @current_token)
+      @try_authenticate(token: @Store.state.token)
   
   ws_onmessage: (message) =>
     data = JSON.parse(message.data)
     if data.action == 'logged_in'
       { username, new_token } = data
       @login { username, new_token }
-    else if data.msg
-      console.log data.msg
+    else
+      @CrudMapper.process_ws_message(data)
 
   ws_onclose: (e) =>
+    # The close event only logs out if there's a special message passed from
+    # the server. Otherwise it's assumed to be a temporary disconnection
+    # and the client will try and reconnect on an interval.
     if e.reason == "logged_out"
       @Cookies.expire("token")
-      @current_token = null
+      @Store.commit("SET_TOKEN", null)
 
-    @auth.username = null
-    @auth.done = false
+    @Store.commit("SET_USERNAME", null)
+    @Store.commit("SET_LOGGED_IN", false)
     @ws_connect_interval ||= setInterval =>
       @init_ws_and_auth()
     , 500
@@ -77,12 +82,12 @@ module.exports = class Client
   login: ({username, new_token}) =>
     console.log("new token: #{new_token}")
     @Cookies.set("token", new_token)
-    @current_token = new_token
-    @auth.done = true
-    @auth.username = username
+    @Store.commit("SET_TOKEN", new_token)
+    @Store.commit("SET_LOGGED_IN", true)
+    @Store.commit("SET_USERNAME", username)
 
   logout: =>
-    @$.get "http://localhost:3000/logout?token=#{@current_token}", (response) =>
+    @$.get "http://localhost:3000/logout?token=#{@Store.state.token}", (response) =>
       { success, error } = JSON.parse response
       if error
         alert(error)

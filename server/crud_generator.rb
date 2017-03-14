@@ -6,9 +6,10 @@
 # then sinatra-cross_origin is a dependency and "register Sinatra::CrossOrigin"
 # should be run first
 #
-module Sinatra
-  module CrudGenerator
 
+module Sinatra
+
+  module CrudGenerator
 
     def get_default_secure_params(resource_class)
       Proc.new do
@@ -20,18 +21,18 @@ module Sinatra
 
     def crud_generate(
       resource:, resource_class:, root_path: '/',
-      cross_origin_opts: nil,
+      cross_origin_opts: nil, auth: nil,
       index: nil, create: nil, read: nil, update: nil, destroy: nil,
       except: []
     )
 
-    before do
-      if request.request_method == 'OPTIONS'
-        response.headers["Access-Control-Allow-Origin"] = "http://localhost:8080"
-        response.headers["Access-Control-Allow-Methods"] = "POST,DELETE,PUT,GET"
-        halt 200
+      before do
+        if request.request_method == 'OPTIONS'
+          response.headers["Access-Control-Allow-Origin"] = "http://localhost:8080"
+          response.headers["Access-Control-Allow-Methods"] = "POST,DELETE,PUT,GET"
+          halt 200
+        end
       end
-    end
 
       plural = resource.pluralize
       raise(
@@ -39,43 +40,56 @@ module Sinatra
       ) unless plural.eql?(resource + "s")
       
       default_secure_params_proc = get_default_secure_params(resource_class)
-      index  ||= {
+
+      index ||= {}
+      index = {
         method: :get,
         path: "/#{plural}",
-        auth: Proc.new { },
+        auth: auth || Proc.new { },
         filter: Proc.new { |records| records }
-      }
-      create ||= {
+      }.merge(index)
+
+      create ||= {}
+      create = {
         method: :post,
         path: "/#{plural}",
-        auth: Proc.new { },
+        auth: auth || Proc.new { },
         secure_params: default_secure_params_proc 
-      }
-      read   ||= {
+      }.merge(create)
+
+      read ||= {}
+      read = {
         method: :get,
         path: "/#{resource}",
-        auth: Proc.new { } 
-      }
-      update ||= {
+        auth: auth || Proc.new { } 
+      }.merge(read)
+
+      update ||= {}
+      update = {
         method: :put,
         path: "/#{resource}",
-        auth: Proc.new { },
+        auth: auth || Proc.new { },
         secure_params: default_secure_params_proc
-      }
-      destroy ||= {
+      }.merge(update)
+
+      destroy ||= {}
+      destroy = {
         method: :delete,
         path: "/#{resource}",
-        auth: Proc.new { } 
-      }
+        auth: auth || Proc.new { } 
+      }.merge(destroy)
 
       unless except.include?(:index)
         send(index[:method], index[:path]) do
           cross_origin(cross_origin_opts) if cross_origin_opts
           index[:auth].call
-          index[:filter].call(resource_class.all).map(&:public_attributes).to_json
+          {
+            success: index[:filter].call(resource_class.all).map(&:public_attributes)
+          }.to_json
         end
       end
 
+      # Calls ActiveRecord "save" (via "create"), which is patched by ServerPush
       unless except.include?(:create)
         send(create[:method], create[:path]) do
           cross_origin(cross_origin_opts) if cross_origin_opts
@@ -105,6 +119,7 @@ module Sinatra
         end
       end
 
+      # calls ActiveRecord "update", which is patched by ServerPush
       unless except.include?(:update)
         send(update[:method], update[:path]) do
           cross_origin(cross_origin_opts) if cross_origin_opts
@@ -118,7 +133,7 @@ module Sinatra
               found.send(:"#{key}=", params[key])
             end
             if found.valid?
-              found.save
+              found.update
               { success: found.public_attributes }.to_json
             else
               { error: found.errors.full_messages }.to_json
@@ -129,6 +144,7 @@ module Sinatra
         end
       end
 
+      # calls ActiveRecord "destroy" which is patched by ServerPush
       unless except.include?(:destroy)
         send(destroy[:method], destroy[:path]) do
           cross_origin(cross_origin_opts) if cross_origin_opts
