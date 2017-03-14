@@ -1,6 +1,5 @@
 class Ws
 
-  # Opens a new websocket connection from a request
   def self.run(request)
     return unless Faye::WebSocket.websocket?(request.env)
     socket = Faye::WebSocket.new(request.env)

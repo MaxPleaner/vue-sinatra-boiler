@@ -1,6 +1,7 @@
 // Little hack so that that coffee-loader uses coffee 2
 var coffeescript = require('coffee-script')
-require.cache[require.resolve('coffee-script')] = require.cache[require.resolve('coffeescript')]
+require.cache[require.resolve('coffee-script')] = \
+require.cache[require.resolve('coffeescript')]
 
 module.exports = {
 
@@ -13,9 +14,9 @@ module.exports = {
 
   // Outline of loaders:
   //
-  //   slim => html => coffee
+  //   slim => html => js
   //     see components/root/root.coffee for an example of loading a slim
-  //     template into a coffee string as HTML
+  //     template into a js string as HTML
   //
   //   coffee => js
   //      everything is concatenated into bundle.js

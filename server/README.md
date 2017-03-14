@@ -20,5 +20,6 @@ It's just the API for the webpack client
 Important files:
   - websocket stuff in ws.rb
   - regular routes in server.rb
-
+  - crud generator
+  - server push
 ---

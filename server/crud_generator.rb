@@ -159,7 +159,7 @@ module Sinatra
         end
       end
 
-    end # crud_generate
+    end # /crud_generate
 
   end
 end
