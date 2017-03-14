@@ -11,5 +11,21 @@ module.exports = load: ({deps: {Vue, CrudMapper}}) ->
     SET_USERNAME: (state, username) ->
       Vue.set(state, "username", username)
 
-  Object.assign(todos_crud, auth)
+  errors = 
+    PUSH_ERROR: (state, error) ->
+      state.errors.push error
+      Vue.set state, "errors", state.errors
+    SHIFT_ERROR: (state) ->
+      state.errors.shift()
+      Vue.set state, "errors", state.errors
+
+  notices =
+    PUSH_NOTICE: (state, notice) ->
+      state.notices.push notice
+      Vue.set state, "notices", state.notices
+    SHIFT_NOTICE: (state) ->
+      state.notices.shift()
+      Vue.set state, "notices", state.notices      
+
+  Object.assign(todos_crud, auth, errors, notices)
 

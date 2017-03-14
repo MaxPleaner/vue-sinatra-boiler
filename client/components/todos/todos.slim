@@ -1,8 +1,8 @@
 div#todos
-  input type='text' @keyup.enter='create_todo' placeholder='add todo'
+  input type='text' @keyup.enter='create_todo' placeholder='add todo (enter to save)'
   ul
     template v-for='(todo, id) in todos' 
       li
-        input type='text' @keyup.enter='update_todo($event, todo)' :value='todo.text'
+        input type='text' @keyup.enter='update_todo($event, todo)' :value="todo.text" placeholder='update todo (enter to save)'
         button @click='delete_todo(todo)' delete
 

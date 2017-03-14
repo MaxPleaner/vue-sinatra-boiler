@@ -33,6 +33,15 @@ class Server < Sinatra::Base
   }
   register Sinatra::Auth::Github
   
+
+  logged_in_only = Proc.new do |request|
+    if AuthenticatedTokens[request.params['token']]
+      false
+    else
+      { error: ["not_authenticated for #{request.request_method} #{request.path_info}"] }.to_json
+    end
+  end
+
   register Sinatra::CrudGenerator
   crud_generate(
     resource: "todo",
@@ -40,6 +49,9 @@ class Server < Sinatra::Base
     cross_origin_opts: {
       allow_origin: "http://localhost:8080"
     },
+    create: { auth: logged_in_only },
+    update: { auth: logged_in_only },
+    destroy: { auth: logged_in_only }
   )
 
   get '/token' do
@@ -102,10 +114,10 @@ class Server < Sinatra::Base
         Users[username].clear
         { success: "logged out" }.to_json
       else
-        { error: "can't find user to log out" }.to_json
+        { error: ["can't find user to log out"] }.to_json
       end
     else
-      { error: 'cant log out; no token provided' }.to_json
+      { error: ['cant log out; no token provided'] }.to_json
     end
   end
 
@@ -121,10 +133,10 @@ class Server < Sinatra::Base
         Sockets.delete token
         { success: "logged out" }.to_json
       else
-        { error: "can't find user to log out" }.to_json
+        { error: ["can't find user to log out"] }.to_json
       end
     else
-      { error: 'cant log out; no token provided' }.to_json
+      { error: ['cant log out; no token provided'] }.to_json
     end
   end
 

@@ -80,7 +80,6 @@ module.exports = class Client
       token: token
 
   login: ({username, new_token}) =>
-    console.log("new token: #{new_token}")
     @Cookies.set("token", new_token)
     @Store.commit("SET_TOKEN", new_token)
     @Store.commit("SET_LOGGED_IN", true)

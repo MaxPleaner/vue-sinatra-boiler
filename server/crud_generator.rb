@@ -12,7 +12,7 @@ module Sinatra
   module CrudGenerator
 
     def get_default_secure_params(resource_class)
-      Proc.new do
+      Proc.new do |request|
         resource_class.new.attributes.keys.reject do |key|
           key.in? %w{id created_at updated_at}
         end
@@ -25,6 +25,21 @@ module Sinatra
       index: nil, create: nil, read: nil, update: nil, destroy: nil,
       except: []
     )
+
+      # the auth argument is a proc that can be used to disallow some requests.
+      # It is passed the request as an argument.
+      # It it returns something truthy, then the result of the auth block is sent
+      # to the client and the route goes no further.
+      # That's why the default proc returns false (to allow all requests)
+
+      # The secure params (for update and create) defaults to all the keys except
+      # id, created_at, and updated_at
+      # It can be specified for a particular route
+      # e.g. to allow no params on create:
+      #    crud_generate(
+      #      ... other opts (resource and resource_class are mandatory)
+      #      create: { secure_params: Proc.new { |request| [] } }
+      #    )
 
       if cross_origin_opts
         # Allow CORS preflight requests.
@@ -49,7 +64,7 @@ module Sinatra
       index = {
         method: :get,
         path: "/#{plural}",
-        auth: auth || Proc.new { },
+        auth: auth || Proc.new { |request| false },
         filter: Proc.new { |records| records }
       }.merge(index)
 
@@ -57,7 +72,7 @@ module Sinatra
       create = {
         method: :post,
         path: "/#{plural}",
-        auth: auth || Proc.new { },
+        auth: auth || Proc.new { |request| false },
         secure_params: default_secure_params_proc 
       }.merge(create)
 
@@ -65,14 +80,14 @@ module Sinatra
       read = {
         method: :get,
         path: "/#{resource}",
-        auth: auth || Proc.new { } 
+        auth: auth || Proc.new { |request| false } 
       }.merge(read)
 
       update ||= {}
       update = {
         method: :put,
         path: "/#{resource}",
-        auth: auth || Proc.new { },
+        auth: auth || Proc.new { |request| false },
         secure_params: default_secure_params_proc
       }.merge(update)
 
@@ -80,13 +95,14 @@ module Sinatra
       destroy = {
         method: :delete,
         path: "/#{resource}",
-        auth: auth || Proc.new { } 
+        auth: auth || Proc.new { |request| false } 
       }.merge(destroy)
 
       unless except.include?(:index)
         send(index[:method], index[:path]) do
           cross_origin(cross_origin_opts) if cross_origin_opts
-          index[:auth].call
+          auth_result = index[:auth].call(request)
+          return auth_result if auth_result
           {
             success: index[:filter].call(resource_class.all).map(&:public_attributes)
           }.to_json
@@ -97,9 +113,10 @@ module Sinatra
       unless except.include?(:create)
         send(create[:method], create[:path]) do
           cross_origin(cross_origin_opts) if cross_origin_opts
-          create[:auth].call
+          auth_result = create[:auth].call(request)
+          return auth_result if auth_result
           filtered_params = params.select do |key, val|
-            key.in? *create[:secure_params].call
+            key.in? *create[:secure_params].call(request)
           end
           created = resource_class.create(filtered_params)
           if created.persisted?
@@ -113,7 +130,8 @@ module Sinatra
       unless except.include?(:read)
         send(read[:method], read[:path]) do
           cross_origin(cross_origin_opts) if cross_origin_opts
-          read[:auth].call
+          auth_result = read[:auth].call(request)
+          return auth_result if auth_result
           found = resource_class.find_by(id: params[:id])
           if found
             { success: found.attributes }.to_json
@@ -127,9 +145,10 @@ module Sinatra
       unless except.include?(:update)
         send(update[:method], update[:path]) do
           cross_origin(cross_origin_opts) if cross_origin_opts
-          update[:auth].call
+          auth_result = update[:auth].call(request)
+          return auth_result if auth_result
           filtered_params = params.select do |key, val|
-            key.in? *create[:secure_params].call
+            key.in? *create[:secure_params].call(request)
           end
           found = resource_class.find_by(id: params[:id])
           if found
@@ -152,7 +171,8 @@ module Sinatra
       unless except.include?(:destroy)
         send(destroy[:method], destroy[:path]) do
           cross_origin(cross_origin_opts) if cross_origin_opts
-          destroy[:auth].call
+          auth_result = destroy[:auth].call(request)
+          return auth_result if auth_result
           found = resource_class.find_by(id: params[:id])
           if found
             found.destroy!

@@ -6,3 +6,4 @@ module.exports = load: ({deps}) ->
   contact: require('./contact/contact.coffee').load { deps }
   todos: require('./todos/todos.coffee').load { deps }
   authenticator: require('./authenticator/authenticator.coffee').load { deps }
+  notices: require("./notices/notices.coffee").load { deps }

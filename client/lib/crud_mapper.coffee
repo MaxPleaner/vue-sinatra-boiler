@@ -76,43 +76,54 @@ module.exports = load: ({deps: {$, Vue}}) ->
       destroy = Object.assign {method: "delete", path: "#{resource}"}, destroy
 
       "index_#{resource}": ({commit}) -> new Promise (resolve, reject) =>
-        $[index.method] "#{root_path}#{index.path}", {}, (response) ->
-          {success, errors} = JSON.parse(response)
+        data = token: AppClient.Store.state.token
+        $[index.method] "#{root_path}#{index.path}", data, (response) ->
+          {success, error} = JSON.parse(response)
           if success
             commit("INDEX_#{resource.toUpperCase()}", success)
             # Success object here is a list of records
             resolve(success)
           else
-            reject(errors)
+            AppClient.Store.dispatch("add_errors", Array.from(error))
+            reject(error)
       
       "create_#{resource}": ({commit}, body) -> new Promise (resolve, reject) =>
+        data = Object.assign body, {token: AppClient.Store.state.token}
         $[create.method] "#{root_path}#{create.path}", body, (response) ->
-          {success, errors} = JSON.parse(response)
+          {success, error} = JSON.parse(response)
           if success
             commit("CREATE_#{resource.toUpperCase()}", success)
+            AppClient.Store.dispatch("add_notice", "created todo")
             # Success object here is a new record
             resolve(success)
           else
-            reject(errors)
+            AppClient.Store.dispatch("add_errors", Array.from(error))
+            reject(error)
 
       "destroy_#{resource}": ({commit}, {id}) -> new Promise (resolve, reject) =>
-        $[destroy.method] "#{root_path}#{destroy.path}", {id}, (response) =>
-          { success, errors } = JSON.parse response
+        data = Object.assign {id}, {token: AppClient.Store.state.token}
+        $[destroy.method] "#{root_path}#{destroy.path}", data, (response) =>
+          { success, error } = JSON.parse response
           if success
             commit "DESTROY_#{resource.toUpperCase()}", success
+            AppClient.Store.dispatch("add_notice", "destroyed todo")
             # Success object here is the deleted record
             resolve(success)
           else
-            reject(errors)
+            AppClient.Store.dispatch("add_errors", Array.from(error))
+            reject(error)
 
       "update_#{resource}": ({commit}, body) -> new Promise (resolve, reject) =>
+        data = Object.assign body, {token: AppClient.Store.state.token}
         $[update.method] "#{root_path}#{update.path}", body, (response) =>
-          { success, errors } = JSON.parse response
+          { success, error } = JSON.parse response
           if success
             commit "UPDATE_#{resource.toUpperCase()}", success
+            AppClient.Store.dispatch("add_notice", "updated todo")
             # Success object here is the deleted record
             resolve(success)
           else
-            reject(errors)
+            AppClient.Store.dispatch("add_errors", Array.from(error))
+            reject(error)
         
   CrudMapper
