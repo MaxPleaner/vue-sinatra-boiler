@@ -1,4 +1,4 @@
-module.exports = load: ({deps: {$, Vue}}) ->
+module.exports = load: ({deps: {$, Vue, Client}}) ->
 
   CrudMapper = {}
 
@@ -20,6 +20,8 @@ module.exports = load: ({deps: {$, Vue}}) ->
   # ------------------------------------------------
 
   Object.assign CrudMapper,
+
+    Client: Client
 
     # call from ws onopen or something like that
     get_indexes: ->
@@ -58,7 +60,7 @@ module.exports = load: ({deps: {$, Vue}}) ->
 
       @resources.add(resource)
 
-      root_path ||= AppClient.base_url
+      root_path ||= "#{@Client.prototype.base_url}/"
 
       index ||= {}
       index = Object.assign {method: "get", path: "#{resource}s"}, index

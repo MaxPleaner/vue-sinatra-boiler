@@ -16,6 +16,9 @@ deps = { Vue, $, Vuex, mapState, mapActions, VueRouter, Cookies }
 # ------------------------------------------------
 
 Object.assign deps,
+  Client: require("./client")
+
+Object.assign deps,
   CrudMapper: require("./lib/crud_mapper").load { deps }
 Object.assign deps,
   Store: require('./lib/store').load { deps }
@@ -30,8 +33,6 @@ Object.assign deps,
 # Start client side app
 # ------------------------------------------------
 
-Client = require "./client"
-
 $ ->
-  window.AppClient = new Client({deps})
+  window.AppClient = new deps.Client({deps})
   AppClient.init()
