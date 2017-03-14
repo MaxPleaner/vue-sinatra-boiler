@@ -1,7 +1,6 @@
 // Little hack so that that coffee-loader uses coffee 2
 var coffeescript = require('coffee-script')
-require.cache[require.resolve('coffee-script')] = \
-require.cache[require.resolve('coffeescript')]
+require.cache[require.resolve('coffee-script')] = require.cache[require.resolve('coffeescript')]
 
 module.exports = {
 

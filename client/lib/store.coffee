@@ -7,6 +7,5 @@ module.exports =
       state: require('./store/state').load({deps})
       mutations: require('./store/mutations').load({deps})
       actions: require('./store/actions').load({deps})
-      getters: require('./store/getters').load({deps})
 
     
