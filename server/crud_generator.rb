@@ -26,11 +26,15 @@ module Sinatra
       except: []
     )
 
-      before do
-        if request.request_method == 'OPTIONS'
-          response.headers["Access-Control-Allow-Origin"] = "http://localhost:8080"
-          response.headers["Access-Control-Allow-Methods"] = "POST,DELETE,PUT,GET"
-          halt 200
+      if cross_origin_opts
+        # Allow CORS preflight requests.
+        # Each individual route still needs to state a CORS policy if it has one.
+        before do
+          if request.request_method == 'OPTIONS'
+            response.headers["Access-Control-Allow-Origin"] = "http://localhost:8080"
+            response.headers["Access-Control-Allow-Methods"] = "POST,DELETE,PUT,GET"
+            halt 200
+          end
         end
       end
 

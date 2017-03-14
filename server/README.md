@@ -10,7 +10,8 @@ another boiler I made.
 Steps:
 
 1. bundle
-2. thin start
+2. bundle exec rake db:create db:migrate
+2. bundle exec thin start
 
 ---
 

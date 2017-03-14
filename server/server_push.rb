@@ -6,7 +6,7 @@ module ServerPush
   def publish_to
     Sockets.values.map(&:to_a).flatten
   end
-
+  
   def save(*args)
     should_push = valid? && !persisted?
     result = super(*args)

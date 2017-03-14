@@ -66,6 +66,9 @@ Some important concepts to keep in mind:
 
 - `components/` contains a separate folder for each component (`about/` and `contact/` are ommited here)
 - all the coffee, slim, and sass files get compiled into `bundle.js` which is loaded by `index.html` 
+- the [slim-lang-loader](http://github.com/maxpleaner/slim-lang-loader
+  used by webpack is somethin I authored. It allows .slim files to be passed through
+  the HTML loader to become strings in Javascript.
 
 ```txt
 ├── client.coffee ------------------ The core of the client side code, required by loader.coffee
@@ -118,4 +121,13 @@ Some important concepts to keep in mind:
 ├── server.rb ---------------------- Core of the Server, definition of Sinatra app
 └── ws.rb -------------------------- The websocket API
 ```
+
+### Todos
+
+Extract the Crud generators and server push into their own libraries
+
+### Help?
+
+If you are interested in using this boiler but are having a hard time making sense
+of it, I'll be happy to help if you reach out to maxpleaner@gmail.com
 
