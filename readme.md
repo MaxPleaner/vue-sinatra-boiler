@@ -150,6 +150,8 @@ The server includes a Procfile so it's easy to deploy to heroku.
 
 Extract the Crud generators and server push into their own libraries
 
+Why does refreshing the demo twice cause a logout?
+
 ### Help?
 
 If you are interested in using this boiler but are having a hard time making sense
