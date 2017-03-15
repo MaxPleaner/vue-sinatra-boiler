@@ -18,6 +18,11 @@ In other words, any connected clients will see the todo list update in realtime,
 even if the action was called by a different client. It also includes github oauth,
 although the todos functionality doesn't require login.
 
+**demo**
+
+see [https://maxpleaner.github.io/vue-sinatra-boiler](https://maxpleaner.github.io/vue-sinatra-boiler) 
+(the backend is on heroku)
+
 ---
 
 ### How to run
@@ -137,6 +142,9 @@ The server includes a Procfile so it's easy to deploy to heroku.
 1. `heroku create --app <some app name>`
 2. `sh push_server_to_heroku`
 3. `heroku run rake db:migrate`
+4. use `heroku config:set` to copy over the GitHub credentials in `.env`
+5. Make sure to re-configure the Github application on their developer console
+   so that it redirects to `https://<your url>/auth/github/callback`
 
 ### Todos
 
