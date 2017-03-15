@@ -78,6 +78,7 @@ class Server < Sinatra::Base
   )
 
   get '/health' do
+    cross_origin allow_origin: CLIENT_BASE_URL
     status 200
   end
 
