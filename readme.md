@@ -134,7 +134,7 @@ First of all, you should decide what the production urls are going to be
 for the front-end and server. Then do a search and replace in the codebase
 for the following strings:
 
-- `vue-sinatra-boiler-demo.herokuapp.com` (replace with your server url) _used by client for `ws://` and `https://`
+- `vue-sinatra-boiler-demo.herokuapp.com` (replace with your server url) _used by client for `wss://` and `https://`
 - `maxpleaner.github.io` (replace with your front-end host only, not including path) _used by server for CORS_
 
 The front end is easy to deploy to Github pages or another host like that.
