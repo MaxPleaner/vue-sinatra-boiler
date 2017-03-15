@@ -77,6 +77,10 @@ class Server < Sinatra::Base
     destroy: { auth: logged_in_only }
   )
 
+  get '/health' do
+    status 200
+  end
+
   get '/token' do
     cross_origin allow_origin: CLIENT_BASE_URL
     { token: new_token }.to_json
