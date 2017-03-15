@@ -122,28 +122,6 @@ class Server < Sinatra::Base
     end
   end
 
-  get '/logout_all_devices' do
-    cross_origin allow_origin: CLIENT_BASE_URL
-    token = params[:token]
-    if token
-      if username = AuthenticatedTokens[token]
-        logout!
-        tokens = Users[username]
-        tokens.each do |user_token|
-          AuthenticatedTokens.delete user_token
-          Sockets[user_token].each { |ws| ws.close(401, "logged out") }
-          Sockets.delete user_token
-        end
-        Users[username].clear
-        { success: "logged out" }.to_json
-      else
-        { error: ["can't find user to log out"] }.to_json
-      end
-    else
-      { error: ['cant log out; no token provided'] }.to_json
-    end
-  end
-
   get '/logout' do
     cross_origin allow_origin: CLIENT_BASE_URL
     token = params[:token]
