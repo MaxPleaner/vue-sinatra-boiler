@@ -4,19 +4,19 @@ a boiler built with Vue (client) and Sinata (server).
 
 The server uses faye-websockets and maps connected sockets to logged in users
 via a token passed to the connect request. It includes Github oAuth,
-ActiveRecord, a Crud generator, and a server-push library to alert clients of
+ActiveRecord, a Crud generator for sinatra, and a server-push library to alert clients of
 DB updates.
 
 The client uses Vuex, a redux-like library with mutations/actions/store and such.
 Since this type of thing generally requires a lot of boiler, there's a Crud
 generator here too. It uses webpack to compile NPM deps, coffeescript, sass, and slim
-code into Javascript objects that can be run from the client. Webpack has great
-built-in hot reloading and runs the front-end as a static server.
+code into Javascript objects that can be run from the client. Webpack has
+built-in hot reloading and runs the front-end as a static server for development.
 
 Out the box, this boiler provides a basic collaborative Todo app with 3-way data binding.
 In other words, any connected clients will see the todo list update in realtime,
-even if the action was called by a different client. It also includes github oauth,
-although the todos functionality doesn't require login.
+even if the action was called by a different client. Anyone can see the todos list,
+but only authenticated users can update/destroy/create.
 
 **demo**
 
@@ -30,7 +30,7 @@ see [https://maxpleaner.github.io/vue-sinatra-boiler](https://maxpleaner.github.
 1. First of all, make sure you have at least the current LTS version of Node
 (right now it's 6.10.0), Ruby 2.3 or newer, and a Unix environment.
 
-2. Next, clone the repo and change the origin
+2. clone the repo and change the origin to something beloning to you (or fork)
       
         git clone https://github.com/MaxPleaner/vue-sinatra-boiler
         cd vue-sinatra-boiler
@@ -69,9 +69,8 @@ see [https://maxpleaner.github.io/vue-sinatra-boiler](https://maxpleaner.github.
 
 Some important concepts to keep in mind:
 
-- `components/` contains a separate folder for each component (`about/` and `contact/` are ommited here)
 - all the coffee, slim, and sass files get compiled into `bundle.js` which is loaded by `index.html` 
-- the [slim-lang-loader](http://github.com/maxpleaner/slim-lang-loader
+- the [slim-lang-loader](http://github.com/maxpleaner/slim-lang-loader)
   used by webpack is somethin I authored. It allows .slim files to be passed through
   the HTML loader to become strings in Javascript.
 
@@ -109,6 +108,8 @@ Some important concepts to keep in mind:
 ```
 
 #### server
+
+**for more in-depth docs see [sinatra_sockets](http://github.com/maxpleaner/sinatra_sockets)**
 
 ```txt
 ├── config.ru ---------------------- Entry point to server, run by "bundle exec thin start"
